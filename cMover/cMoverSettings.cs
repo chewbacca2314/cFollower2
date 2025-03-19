@@ -13,10 +13,11 @@ namespace cFollower.cMover
     {
         private static cMoverSettings _instance;
         public static cMoverSettings Instance => _instance ?? (_instance = new cMoverSettings());
+
         private cMoverSettings() : base(GetSettingsFilePath(Configuration.Instance.Name, "cMoverSettings.json"))
         {
-
         }
+
         private int _pathRefreshRate;
         private int _moveRange;
         private bool _randomizeMove;
@@ -46,6 +47,7 @@ namespace cFollower.cMover
                 NotifyPropertyChanged(() => AvoidWallHugging);
             }
         }
+
         [DefaultValue(30)]
         public int PathRefreshRate
         {
@@ -57,6 +59,7 @@ namespace cFollower.cMover
                 NotifyPropertyChanged(() => PathRefreshRate);
             }
         }
+
         [DefaultValue(35)]
         public int MoveRange
         {

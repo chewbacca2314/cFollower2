@@ -39,12 +39,14 @@
                             <TextBox Text="{Binding Path=DistanceToCheckTransition, Mode=TwoWay}" ToolTip="Distance of leader coords changed to start checking for transition nearby"/>
                             <Label Content="Obstacle size multiplier (blocking arenas)"/>
                             <TextBox Text="{Binding Path=ObstacleSizeMultiplier, Mode=TwoWay}" ToolTip="Obstacle size multiplier to block close arena transitions"/>
-                            <CheckBox Content="Trade toggle" IsChecked="{Binding Path=TradeEnabled, Mode=TwoWay}"/>
+                            <Label Content="Move type of follower"/>
+                            <ComboBox Name="MoveTypeComboBox" ItemsSource="{x:Static local:cFollowerSettings.MoveTypeOptions}" SelectedValue="{Binding Path=FollowType}" SelectedIndex="0" />
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Header="Deposit" Grid.Row="1" Grid.Column="0">
                         <StackPanel>
                             <CheckBox Content="Deposit toggle" IsChecked="{Binding Path=DepositEnabled, Mode=TwoWay}"/>
+                            <CheckBox Content="Trade toggle" IsChecked="{Binding Path=TradeEnabled, Mode=TwoWay}"/>
                             <Label Content="Tab names (tab1,tab2,tab3)"/>
                             <TextBox Text="{Binding Path=DepositTabNames, Mode=TwoWay}" ToolTip="Distance of leader coords changed to start checking for transition nearby"/>
                             <Label Content="Trade deposit delay"/>

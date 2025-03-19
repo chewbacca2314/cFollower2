@@ -154,6 +154,7 @@ namespace cFollower.cMover
                 else
                 {
                     MouseManager.SetMousePos("Alcor75PlayerMoverSettings.MoveTowards", point, false);
+                    Log.WarnFormat("[SetMousePos] {0}", point);
                 }
             }
             else

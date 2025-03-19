@@ -20,15 +20,14 @@
         <!--Temporary solution is to remove `DataContext="{x:Static local:NullBotSettings.Instance}"` while you develope your UI and readd it befor compilation.-->
         <GroupBox Header="Options" DataContext="{x:Static local:cMoverSettings.Instance}">
             <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left">
-                <Label Content="MinMoveDistance name"/>
-                <StackPanel Margin="10">
-                    <CheckBox Grid.Row="0" Grid.Column="0" Content="Randomize Movement" Margin="10,0,10,0" IsChecked="{Binding Path=RandomizeMove, Mode=TwoWay}" VerticalAlignment="Center" ToolTip="Should follower randomize movement?"/>
-                    <Label Content="Path refresh rate"/>
-                    <TextBox Text="{Binding PathRefreshRate, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-                    <Label Content="Min step distance"/>
-                    <TextBox Text="{Binding MinMoveDistance, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock Text="{Binding Error}" Foreground="Red" />
-                </StackPanel>
+                <CheckBox Grid.Row="0" Grid.Column="0" Content="Randomize Movement" Margin="10,0,10,0" IsChecked="{Binding Path=RandomizeMove, Mode=TwoWay}" VerticalAlignment="Center" ToolTip="Should follower randomize movement?"/>
+                <Label Content="Path refresh rate"/>
+                <TextBox Text="{Binding PathRefreshRate, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                <Label Content="Move range"/>
+                <TextBox Text="{Binding MoveRange, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                <Label Content="Single use distance"/>
+                <TextBox Text="{Binding SingleUseDistance, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="{Binding Error}" Foreground="Red" />
             </StackPanel>
         </GroupBox>
 

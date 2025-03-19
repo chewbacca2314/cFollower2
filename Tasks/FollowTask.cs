@@ -13,6 +13,7 @@ using cFollower.cMover;
 using DreamPoeBot.Loki.Bot.Pathfinding;
 using Message = DreamPoeBot.Loki.Bot.Message;
 using DreamPoeBot.Loki.FilesInMemory;
+using DreamPoeBot.Common;
 
 namespace cFollower
 {
@@ -41,22 +42,44 @@ namespace cFollower
             }
 
             float distanceToLeader = leader.Distance;
-            if (distanceToLeader < cFollowerSettings.Instance.MinDistanceToFollow)
+
+            if (!(distanceToLeader > cFollowerSettings.Instance.MinDistanceToFollow || leader.IsMoving || leader?.CurrentAction?.Skill?.InternalName == "TempestFlurry"))
             {
+                LokiPoe.ProcessHookManager.ClearAllKeyStates();
                 Log.Debug($"[{Name}] Standing. Distance to leader: {(distanceToLeader)}");
                 return false;
             }
 
             var leaderPosition = leader.Position;
-            var fastWalkable = ExilePather.FastWalkablePositionFor(leaderPosition);
+            Vector2i fastWalkable = ExilePather.FastWalkablePositionFor(leaderPosition);
             var myPos = LokiPoe.Me.Position;
 
-            if (ExilePather.PathDistance(myPos, fastWalkable) < 45)
-                LokiPoe.InGameState.SkillBarHud.UseAt(4, false, fastWalkable, false);
-            else
-                PlayerMoverManager.Current.MoveTowards(fastWalkable);
+            if (cFollowerSettings.Instance.FollowType == MoverHelper.MoveType.ToCursor)
+            {
+                Vector2i leaderDest = Vector2i.Zero;
 
-            await Wait.SleepSafe(50, 70);
+                if (leader?.CurrentMoveAction != null)
+                {
+                    leaderDest = leader.CurrentMoveAction.Destination;
+                }
+
+                if (leader?.CurrentAction?.Skill?.InternalId == "tempest_flurry")
+                {
+                    leaderDest = leader.CurrentAction.Destination;
+                }
+
+                
+                if (leaderDest != Vector2i.Zero)
+                {
+                    var _fastWalkable = ExilePather.FastWalkablePositionFor(leaderDest);
+                    if (_fastWalkable != Vector2i.Zero)
+                        fastWalkable = ExilePather.FastWalkablePositionFor(_fastWalkable);
+                }
+            }
+            
+            PlayerMoverManager.Current.MoveTowards(fastWalkable);
+
+            await Wait.SleepSafe(50, 150);
             return true;
         }
 

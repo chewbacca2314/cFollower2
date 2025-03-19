@@ -23,6 +23,7 @@ namespace cFollower
                 
         }
         private string _leaderName;
+        private MoverHelper.MoveType _moveType;
         private int _minDistance;
         private int _transitionCheckDistance;
         private bool _lootEnabled;
@@ -37,6 +38,22 @@ namespace cFollower
         private int _guildStashDepositDelay;
         private int _tradeDepositDelay;
         private int _obstacleSizeMultiplier;
+        public static List<MoverHelper.MoveType> MoveTypeOptions = new List<MoverHelper.MoveType>
+            {
+                MoverHelper.MoveType.ToLeader,
+                MoverHelper.MoveType.ToCursor
+            };
+        [DefaultValue(MoverHelper.MoveType.ToLeader)]
+        public MoverHelper.MoveType FollowType
+        {
+            get { return _moveType; }
+            set
+            {
+                if (value == _moveType) return;
+                _moveType = value;
+                NotifyPropertyChanged(() => FollowType);
+            }
+        }
         public ObservableCollection<ItemFilter> ItemFilterList
         {
             get => _itemFilterList;//?? (_defensiveSkills = new ObservableCollection<DefensiveSkillsClass>());
@@ -66,6 +83,7 @@ namespace cFollower
                 NotifyPropertyChanged(() => LeaderName);
             }
         }
+
         [DefaultValue(true)]
         public bool LootEnabled
         {

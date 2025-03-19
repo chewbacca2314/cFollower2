@@ -1,16 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using DreamPoeBot.Common;
 using DreamPoeBot.Loki.Bot;
 using DreamPoeBot.Loki.Bot.Pathfinding;
 using DreamPoeBot.Loki.Common;
 using DreamPoeBot.Loki.Game;
-using DreamPoeBot.Loki.Game.Objects;
-using Message = DreamPoeBot.Loki.Bot.Message;
-using log4net;
 using DreamPoeBot.Loki.Game.GameData;
+using DreamPoeBot.Loki.Game.Objects;
+using log4net;
+using Message = DreamPoeBot.Loki.Bot.Message;
 
 namespace cFollower
 {
@@ -36,20 +33,11 @@ namespace cFollower
                 var leader = Utility.GetLeaderPlayer();
                 var leaderPos = leader.Position;
                 var myPos = LokiPoe.Me.Position;
-                var currentWorldArea = LokiPoe.CurrentWorldArea.Name;
-                //Utility.TransitionCheckAreas.ContainsKey(currentWorldArea)
-                if (!blockedTransition && LokiPoe.LocalData.MapMods[StatTypeGGG.MapContainsMapBoss] == 1)
+                if (LokiPoe.LocalData.MapMods.ContainsKey(StatTypeGGG.MapContainsMapBoss) && LokiPoe.LocalData.MapMods[StatTypeGGG.MapContainsMapBoss] == 1)
                 {
-                    var blockages = LokiPoe.ObjectManager.GetObjectsByType<TriggerableBlockage>().Where(x => Utility.TransitionCheckAreas.Contains(x.Metadata)).ToList();
-                    if (blockages.Count() > 0)
+                    if (LokiPoe.ObjectManager.GetObjectsByType<DreamPoeBot.Loki.Game.Objects.AreaTransition>().Any(x => x.IsTargetable))
                     {
-                        arenaBlockages = blockages;
-                        foreach (var blockage in blockages)
-                        {
-                            Log.Debug($"[{Name}] Found arena transition, blocking it");
-                            Utility.AddObstacle(blockage);
-                            blockedTransition = true;
-                        }
+                        await ZoneHelper.InteractWithNearestTransition();
                     }
                 }
 
@@ -67,25 +55,8 @@ namespace cFollower
                             await Wait.SleepSafe(50, 70);
                         }
 
-                        if (areaTransition == null)
-                        {
-                            areaTransition = LokiPoe.ObjectManager.GetObjectsByType<AreaTransition>()
-                                .OrderBy(x => x.Position.Distance(LokiPoe.Me.Position))
-                                .FirstOrDefault(x => ExilePather.PathExistsBetween(myPos, ExilePather.FastWalkablePositionFor(x.Position, 20)));
-                        }
-
-                        var interactionResult = await Coroutines.InteractWith(areaTransition);
-                        Log.Debug($"[{Name}] Interacting with area transition {areaTransition.Name} at {areaTransition.Position}. Succesful?: {interactionResult}");
+                        await ZoneHelper.InteractWithNearestTransition();
                         await Wait.SleepSafe(100, 200);
-
-                        if (arenaBlockages?.Any() == true)
-                        {
-                            foreach (var x in arenaBlockages)
-                            {
-                                Log.Debug($"[{Name}] We transitioned to arena. Now unblocking it at {x.Position}");
-                                Utility.RemoveObstacle(x);
-                            }
-                        }
                     }
                 }
                 //Log.Debug($"[{Name}] We're in same zone with leader. Returning false");

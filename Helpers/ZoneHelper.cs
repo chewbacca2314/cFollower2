@@ -9,6 +9,8 @@ using DreamPoeBot.Common;
 using DreamPoeBot.Loki.Bot;
 using DreamPoeBot.Loki.Bot.Pathfinding;
 using DreamPoeBot.Loki.Common;
+using DreamPoeBot.Loki.Components;
+using DreamPoeBot.Loki.FilesInMemory;
 using DreamPoeBot.Loki.Game;
 using DreamPoeBot.Loki.Game.NativeWrappers;
 using DreamPoeBot.Loki.Game.Objects;
@@ -85,6 +87,18 @@ namespace cFollower
             }
 
             return false;
+        }
+
+        public static async Task<bool> InteractWithNearestTransition()
+        {
+            var myPos = LokiPoe.Me.Position;
+            var areaTransition = LokiPoe.ObjectManager.GetObjectsByType<DreamPoeBot.Loki.Game.Objects.AreaTransition>()
+                    .OrderBy(x => x.Position.Distance(myPos))
+                    .FirstOrDefault(x => x.IsTargetable && ExilePather.PathExistsBetween(myPos, ExilePather.FastWalkablePositionFor(x.Position, 20)));
+
+            var interactionResult = await Coroutines.InteractWith(areaTransition);
+            Log.Debug($"[InteractWithNearestTransition] Interacting with area transition {areaTransition?.Name} at {areaTransition?.Position}. Succesful?: {interactionResult}");
+            return interactionResult;
         }
     }
 }

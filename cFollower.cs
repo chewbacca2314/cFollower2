@@ -128,6 +128,8 @@ namespace cFollower
             }
         }
 
+        #region skip
+
         public string Author => "chewbacca";
         public string Description => "follow bot";
         public string Name => "cFollower";
@@ -154,5 +156,7 @@ namespace cFollower
         {
             return await _taskManager.ProvideLogic(TaskGroup.Enabled, RunBehavior.UntilHandled, logic);
         }
+
+        #endregion
     }
 }
