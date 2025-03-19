@@ -1,0 +1,78 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<!-- https://learn.microsoft.com/en-us/dotnet/csharp/nullable-references#nullable-contexts -->
+		<Nullable>warnings</Nullable>
+		<!-- https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props-desktop#enable-net-desktop-sdk -->
+		<UseWPF>true</UseWPF>
+		<UseWindowsForms>true</UseWindowsForms>
+		<!-- https://devblogs.microsoft.com/dotnet/welcome-to-csharp-10/#implicit-usings -->
+		<ImplicitUsings>enable</ImplicitUsings>
+		<PlatformTarget>x64</PlatformTarget>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<IsPublishable>False</IsPublishable>
+		<!--set this to True to copy the resulting .dll to DPB's plugins folder-->
+		<CopyToPlugins>True</CopyToPlugins>
+		<PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<IsPublishable>False</IsPublishable>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<IsPublishable>False</IsPublishable>
+	</PropertyGroup>
+
+
+	<!-- this will run after Building this project -->
+	<Target Name="CopyToPluginsFolder" AfterTargets="Build" Condition="'$(CopyToPlugins)' == 'True'" Label="Copy dll to plugins folder">
+		<!-- Define the source and destination paths -->
+		<PropertyGroup>
+			<!-- $(TargetFileName) will use the output dll name -->
+			<SourcePath>$(OutputPath)$(TargetFileName)</SourcePath>
+			<PdbFileName>$(TargetName).pdb</PdbFileName>
+			<SourcePdbPath>$(OutputPath)$(PdbFileName)</SourcePdbPath>
+			<!-- Set destination path to your dpb\Plugins\<YourProjectName> directory -->
+			<DestinationPath>$(DPB2)\Plugins\$(ProjectName)</DestinationPath>
+		</PropertyGroup>
+
+		<!-- Create the destination folder if it doesn't exist -->
+		<MakeDir Directories="$(DestinationPath)" />
+
+		<!-- Copy the output DLL to the target Plugins folder -->
+		<Copy SourceFiles="$(SourcePath)" DestinationFolder="$(DestinationPath)" />
+		<!-- Copy the PDB file to the target Plugins folder -->
+		<Copy SourceFiles="$(SourcePdbPath)" DestinationFolder="$(DestinationPath)" />
+	</Target>
+
+
+	<ItemGroup>
+
+		<Reference Include="DreamPoeBot">
+			<HintPath>$(DPB2)\DreamPoeBot.dll</HintPath>
+			<!--do not copy to output directory-->
+			<Private>false</Private>
+		</Reference>
+
+		<Reference Include="log4net">
+			<HintPath>$(DPB2)\log4net.dll</HintPath>
+			<!--do not copy to output directory-->
+			<Private>false</Private>
+		</Reference>
+
+		<Reference Include="MahApps.Metro">
+			<HintPath>$(DPB2)\MahApps.Metro.dll</HintPath>
+			<!--do not copy to output directory-->
+			<Private>false</Private>
+		</Reference>
+
+		<Reference Include="Newtonsoft.Json">
+			<HintPath>$(DPB2)\Newtonsoft.Json.dll</HintPath>
+			<!--do not copy to output directory-->
+			<Private>false</Private>
+		</Reference>
+
+	</ItemGroup>
+</Project>
