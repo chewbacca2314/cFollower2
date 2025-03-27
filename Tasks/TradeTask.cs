@@ -33,17 +33,17 @@ namespace cFollower
             if (PartyHelper.GetPartyStatus() != PartyStatus.PartyMember)
                 return false;
 
-            if (LokiPoe.InGameState.NotificationHud.IsOpened)
-            {
-                if (LokiPoe.InGameState.NotificationHud.NotificationList.Any(x => x.NotificationTypeEnum == LokiPoe.InGameState.NotificationType.Trade))
-                {
-                    LokiPoe.ProcessHookManager.ClearAllKeyStates();
-                    await Wait.SleepSafe(400, 400);
-                    var acceptResult = LokiPoe.InGameState.NotificationHud.HandleNotificationEx(IsTradeRequestToBeAccepted);
+            if (!LokiPoe.InGameState.NotificationHud.IsOpened)
+                return false;
 
-                    Log.Debug($"[{Name}] Found notification. Accept result: {acceptResult}");
-                }
-            }
+            if (!LokiPoe.InGameState.NotificationHud.NotificationList.Any(x => x.NotificationTypeEnum == LokiPoe.InGameState.NotificationType.Trade))
+                return false;
+
+            LokiPoe.ProcessHookManager.ClearAllKeyStates();
+            await Wait.SleepSafe(400, 400);
+            var acceptResult = LokiPoe.InGameState.NotificationHud.HandleNotificationEx(IsTradeRequestToBeAccepted);
+
+            Log.Debug($"[{Name}] Found notification. Accept result: {acceptResult}");
 
             if (!LokiPoe.InGameState.TradeUi.IsOpened)
             {
@@ -191,7 +191,7 @@ namespace cFollower
 
         public async Task<LogicResult> Logic(Logic logic)
         {
-            return LogicResult.Unprovided;
+            return await Task.FromResult(LogicResult.Unprovided);
         }
 
         public MessageResult Message(Message message)

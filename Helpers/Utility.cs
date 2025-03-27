@@ -59,7 +59,7 @@ namespace cFollower
             var num = 10.86957f;
             var val = renderComponent.InteractSize.X / num;
             var val2 = renderComponent.InteractSize.Y / num;
-            var radius = 1.75f * Math.Max(val, val2) * cFollowerSettings.Instance.ObstacleSizeMultiplier;
+            var radius = 1.75f * Math.Max(val, val2);
             ExilePather.PolyPathfinder.AddObstacle(obj.Position, radius);
             ExilePather.PolyPathfinder.UpdateObstacles();
         }

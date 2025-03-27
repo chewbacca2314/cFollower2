@@ -22,9 +22,8 @@ namespace cFollower
     {
         private static readonly ILog Log = Logger.GetLoggerInstanceForType();
 
-        public static bool IsLeaderInHideout()
+        public static bool IsLeaderInHideout(PlayerEntry leader)
         {
-            var leader = Utility.GetLeaderPartyMember();
             if (leader != null)
             {
                 return leader.Area.IsHideoutArea;
@@ -33,9 +32,8 @@ namespace cFollower
             return false;
         }
 
-        public static bool IsLeaderOnMap()
+        public static bool IsLeaderOnMap(PlayerEntry leader)
         {
-            var leader = Utility.GetLeaderPartyMember();
             if (leader != null)
             {
                 return leader.Area.IsMap;
@@ -44,9 +42,8 @@ namespace cFollower
             return false;
         }
 
-        public static bool IsLeaderInCombatArea()
+        public static bool IsLeaderInCombatArea(PlayerEntry leader)
         {
-            var leader = Utility.GetLeaderPartyMember();
             if (leader != null)
             {
                 return leader.Area.IsCombatArea;
@@ -55,9 +52,8 @@ namespace cFollower
             return false;
         }
 
-        public static bool IsLeaderInLab()
+        public static bool IsLeaderInLab(PlayerEntry leader)
         {
-            var leader = Utility.GetLeaderPartyMember();
             if (leader != null)
             {
                 return leader.Area.IsLabyrinthArea;
@@ -66,10 +62,8 @@ namespace cFollower
             return false;
         }
 
-        public static bool IsLeaderInTown()
+        public static bool IsLeaderInTown(PlayerEntry leader)
         {
-            var leader = Utility.GetLeaderPartyMember();
-
             if (leader != null)
             {
                 return leader.Area.IsTown;
@@ -78,9 +72,8 @@ namespace cFollower
             return false;
         }
 
-        public static bool IsInSameZoneWithLeader()
+        public static bool IsInSameZoneWithLeader(PlayerEntry leader)
         {
-            var leader = Utility.GetLeaderPartyMember();
             if (leader != null)
             {
                 return LokiPoe.InGameState.PartyHud.IsInSameZone(leader.Name);

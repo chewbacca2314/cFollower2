@@ -41,7 +41,7 @@ namespace cFollower
                 return false;
             }
 
-            if (!ZoneHelper.IsInSameZoneWithLeader())
+            if (!ZoneHelper.IsInSameZoneWithLeader(cFollower.Leader.LeaderParty))
             {
                 //Log.Debug($"[{Name}] We're not in same zone with leader");
                 return false;
@@ -189,7 +189,7 @@ namespace cFollower
 
         public async Task<LogicResult> Logic(Logic logic)
         {
-            return LogicResult.Unprovided;
+            return await Task.FromResult(LogicResult.Unprovided);
         }
 
         public MessageResult Message(Message message)

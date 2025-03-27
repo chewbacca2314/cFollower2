@@ -24,20 +24,20 @@ namespace cFollower
         }
         private string _leaderName;
         private MoverHelper.MoveType _moveType;
-        private int _minDistance;
+        private int _followDistance;
         private int _transitionCheckDistance;
         private bool _lootEnabled;
         private bool _depositEnabled;
         private bool _tradeEnabled;
         private int _distanceToLeaderLoot;
-        private int _distanceLootLeader;
-        private float _distanceToLootPlayer;
         private ObservableCollection<ItemFilter> _itemFilterList;
         private string _depositTabName;
         private int _stashDepositDelay;
         private int _guildStashDepositDelay;
         private int _tradeDepositDelay;
-        private int _obstacleSizeMultiplier;
+        private int _radiusLeaderLoot;
+        private int _radiusPlayerLoot;
+        private int _groundItemsRefreshRate;
         public static List<MoverHelper.MoveType> MoveTypeOptions = new List<MoverHelper.MoveType>
             {
                 MoverHelper.MoveType.ToLeader,
@@ -63,6 +63,7 @@ namespace cFollower
                 NotifyPropertyChanged(() => ItemFilterList);
             }
         }
+        [DefaultValue("tab1,tab2,tab3")]
         public string DepositTabNames
         {
             get { return _depositTabName; }
@@ -73,6 +74,7 @@ namespace cFollower
                 NotifyPropertyChanged(() => DepositTabNames);
             }
         }
+        [DefaultValue("leadername")]
         public string LeaderName
         {
             get { return _leaderName; }
@@ -117,37 +119,18 @@ namespace cFollower
                 NotifyPropertyChanged(() => TradeEnabled);
             }
         }
-        public int MinDistanceToFollow
+        [DefaultValue(35)]
+        public int FollowDistance
         {
-            get { return _minDistance; }
+            get { return _followDistance; }
             set
             {
-                if (value == _minDistance) return;
-                _minDistance = value;
-                NotifyPropertyChanged(() => MinDistanceToFollow);
+                if (value == _followDistance) return;
+                _followDistance = value;
+                NotifyPropertyChanged(() => FollowDistance);
             }
         }
-        [DefaultValue(2)]
-        public int ObstacleSizeMultiplier
-        {
-            get { return _obstacleSizeMultiplier; }
-            set
-            {
-                if (value == _obstacleSizeMultiplier) return;
-                _obstacleSizeMultiplier = value;
-                NotifyPropertyChanged(() => ObstacleSizeMultiplier);
-            }
-        }
-        public int DistanceToCheckTransition
-        {
-            get { return _transitionCheckDistance; }
-            set
-            {
-                if (value == _transitionCheckDistance) return;
-                _transitionCheckDistance = value;
-                NotifyPropertyChanged(() => DistanceToCheckTransition);
-            }
-        }
+        [DefaultValue(55)]
         public int DistanceToLeaderLoot
         {
             get { return _distanceToLeaderLoot; }
@@ -191,25 +174,39 @@ namespace cFollower
                 NotifyPropertyChanged(() => TradeDepositDelay);
             }
         }
-        public int DistanceToLootLeader
+
+        [DefaultValue(40)]
+        public int RadiusLeaderLoot
         {
-            get { return _distanceLootLeader; }
+            get { return _radiusLeaderLoot; }
             set
             {
-                if (value == _distanceLootLeader) return;
-                _distanceLootLeader = value;
-                NotifyPropertyChanged(() => DistanceToLootLeader);
+                if (value == _radiusLeaderLoot) return;
+                _radiusLeaderLoot = value;
+                NotifyPropertyChanged(() => RadiusLeaderLoot);
             }
         }
 
-        public float DistanceToLootPlayer
+        [DefaultValue(40)]
+        public int RadiusPlayerLoot
         {
-            get { return _distanceToLootPlayer; }
+            get { return _radiusPlayerLoot; }
             set
             {
-                if (value == _distanceToLootPlayer) return;
-                _distanceToLootPlayer = value;
-                NotifyPropertyChanged(() => DistanceToLootPlayer);
+                if (value == _radiusPlayerLoot) return;
+                _radiusPlayerLoot = value;
+                NotifyPropertyChanged(() => RadiusPlayerLoot);
+            }
+        }
+        [DefaultValue(80)]
+        public int GroundItemsRefreshRate
+        {
+            get { return _groundItemsRefreshRate; }
+            set
+            {
+                if (value == _groundItemsRefreshRate) return;
+                _groundItemsRefreshRate = value;
+                NotifyPropertyChanged(() => GroundItemsRefreshRate);
             }
         }
 

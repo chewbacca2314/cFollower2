@@ -32,10 +32,11 @@ namespace cFollower
 
             if (LokiPoe.InGameState.ResurrectPanel.IsOpened)
             {
+                await Wait.SleepSafe(200, 300);
                 Log.Debug($"[{Name}] Resurrection panel is opened, resurrecting at checkpoint");
                 var resurrectResult = LokiPoe.InGameState.ResurrectPanel.Resurrect();
                 Log.Debug($"[{Name}] Resurrect result: {resurrectResult}");
-                await Wait.LatencySleep();
+                await Wait.SleepSafe(200, 300);
             }
 
             return LokiPoe.Me.IsDead;
@@ -45,7 +46,7 @@ namespace cFollower
 
         public async Task<LogicResult> Logic(Logic logic)
         {
-            return LogicResult.Unprovided;
+            return await Task.FromResult(LogicResult.Unprovided);
         }
 
         public MessageResult Message(Message message)

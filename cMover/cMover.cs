@@ -239,7 +239,7 @@ namespace cFollower.cMover
 
         public async Task<LogicResult> Logic(Logic logic)
         {
-            return LogicResult.Unprovided;
+            return await Task.FromResult(LogicResult.Unprovided);
         }
 
         public MessageResult Message(Message message)

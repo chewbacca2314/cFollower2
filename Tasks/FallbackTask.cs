@@ -32,13 +32,13 @@ namespace cFollower
         }
         public async Task<bool> Run()
         {
-            Log.Debug($"[{Name}] Do nothing.");
+            //Log.Debug($"[{Name}] Do nothing.");
             await Wait.Sleep(1);
             return true;
         }
         public async Task<LogicResult> Logic (Logic logic)
         {
-            return LogicResult.Unprovided;
+            return await Task.FromResult(LogicResult.Unprovided);
         }
         public MessageResult Message(Message message)
         {

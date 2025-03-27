@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,8 @@ using DreamPoeBot.Loki.Bot.Pathfinding;
 using DreamPoeBot.Loki.Common;
 using DreamPoeBot.Loki.Coroutine;
 using DreamPoeBot.Loki.Game;
+using DreamPoeBot.Loki.Game.NativeWrappers;
+using DreamPoeBot.Loki.Game.Objects;
 using log4net;
 using Message = DreamPoeBot.Loki.Bot.Message;
 using UserControl = System.Windows.Controls.UserControl;
@@ -26,6 +29,9 @@ namespace cFollower
 
         private readonly TaskManager _taskManager = new TaskManager();
         private Coroutine _coroutine;
+
+        public static LeaderInfo Leader = new LeaderInfo();
+        private Stopwatch _leaderSw = Stopwatch.StartNew();
 
         public void Start()
         {
@@ -56,10 +62,10 @@ namespace cFollower
 
         public void Stop()
         {
+            _taskManager.Stop();
             PluginManager.Stop();
             RoutineManager.Stop();
-            PlayerMoverManager.Stop();
-            _taskManager.Stop();
+            //PlayerMoverManager.Stop();
 
             LokiPoe.ProcessHookManager.Disable();
 
@@ -84,6 +90,12 @@ namespace cFollower
             RoutineManager.Tick();
             PlayerMoverManager.Tick();
             _taskManager.Tick();
+
+            if (_leaderSw.IsRunning && _leaderSw.ElapsedMilliseconds > 1000)
+            {
+                Leader.Update();
+                _leaderSw.Restart();
+            }
 
             if (_coroutine.IsFinished)
             {
@@ -113,8 +125,8 @@ namespace cFollower
             _taskManager.Add(new ZoneHandler());
             _taskManager.Add(new TradeTask());
             _taskManager.Add(new DepositTask());
+            _taskManager.Add(new LootTask());
             _taskManager.Add(new FollowTask());
-            //_taskManager.Add(new LootTask());
             _taskManager.Add(new FallbackTask());
         }
 
@@ -128,6 +140,16 @@ namespace cFollower
             }
         }
 
+        public struct LeaderInfo
+        {
+            public Player LeaderPlayer { get; set; }
+            public PlayerEntry LeaderParty { get; set; }
+            public void Update()
+            {
+                LeaderPlayer = Utility.GetLeaderPlayer();
+                LeaderParty = Utility.GetLeaderPartyMember();
+            }
+        }
         #region skip
 
         public string Author => "chewbacca";

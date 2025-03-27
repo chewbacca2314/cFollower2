@@ -24,15 +24,17 @@ namespace cFollower
         public static PartyStatus GetPartyStatus()
         {
             if (!LokiPoe.InstanceInfo.PartyMembers.Any())
-                return PartyStatus.None;   
-
-            if (LokiPoe.InstanceInfo.PartyLeaderName == LokiPoe.Me.Name)
-                return PartyStatus.PartyLeader;
-
-            if (LokiPoe.InstanceInfo.PartyMembers.Any())
+            {
+                return PartyStatus.None;
+            }
+            else
+            {
+                if (LokiPoe.InstanceInfo.PartyLeaderName == LokiPoe.Me.Name)
+                {
+                    return PartyStatus.PartyLeader;
+                }
                 return PartyStatus.PartyMember;
-
-            return PartyStatus.None;
+            }
         }
     }
 }

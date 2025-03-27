@@ -17,6 +17,10 @@ using Message = DreamPoeBot.Loki.Bot.Message;
 using DreamPoeBot.Loki.Game.Objects;
 using DreamPoeBot.Loki.RemoteMemoryObjects;
 using log4net;
+using System.Security.Principal;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using DreamPoeBot.BotFramework;
+using DreamPoeBot.Common;
 
 namespace cFollower
 {
@@ -24,6 +28,9 @@ namespace cFollower
     {
         private float distanceToLeader;
         private Player leader;
+        private Stopwatch lootSw = Stopwatch.StartNew();
+        private HashSet<int> trashItems = new HashSet<int>();
+        private List<WorldItem> lootTable = new List<WorldItem>();
 
         public async Task<bool> Run()
         {
@@ -32,137 +39,107 @@ namespace cFollower
 
             if (!LokiPoe.IsInGame)
             {
-                Log.Info($"[{Name}] LokiPoe.IsInGame = {LokiPoe.IsInGame}");
+                //Log.Info($"[{Name}] LokiPoe.IsInGame = {LokiPoe.IsInGame}");
                 return false;
             }
 
-            leader = Utility.GetLeaderPlayer();
-            distanceToLeader = leader.Distance;
-            if (distanceToLeader > cFollowerSettings.Instance.DistanceToLeaderLoot)
+            leader = cFollower.Leader.LeaderPlayer;
+            //if (leader.Distance > cFollowerSettings.Instance.DistanceToLeaderLoot)
+            //{
+            //    Log.Debug($"[{Name}] {leader.Distance} > {cFollowerSettings.Instance.DistanceToLeaderLoot}");
+            //    return false;
+            //}
+            if (lootSw.IsRunning && lootSw.ElapsedMilliseconds > cFollowerSettings.Instance.GroundItemsRefreshRate)
             {
-                Log.Debug($"[{Name}] Distance to leader {distanceToLeader}. Skip");
-                return false;
+                lootTable = GetNearbyItems().OrderBy(x => x.Distance).ToList();
+                lootSw.Restart();
             }
-
-            Log.Debug($"[{Name}] Building loot table");
-            var lootTable = BuildLootTable(GetNearbyItemsLabels());
 
             Log.Debug($"[{Name}] Found {lootTable.Count} items to loot");
-            if (lootTable.Count <= 0)
+            if (lootTable.Count == 0)
             {
                 return false;
             }
 
+            var invControl = LokiPoe.InGameState.InventoryUi.InventoryControl_Main;
             foreach (var item in lootTable)
             {
-                var invControl = LokiPoe.InGameState.InventoryUi.InventoryControl_Main;
-                
-                if (invControl.Inventory.CanFitItem(item.Item) && await Coroutines.InteractWith(item))
+                if (leader.Distance > cFollowerSettings.Instance.DistanceToLeaderLoot)
                 {
-                    Log.Debug($"[{Name}] Item {item.Name} looted");
+                    //Log.Debug($"[{Name}] {leader.Distance} > {cFollowerSettings.Instance.DistanceToLeaderLoot}");
+                    return false;
+                }
+
+                if (invControl.Inventory.CanFitItem(item.Item))
+                {
+                    if (item.IsHighlightable && await Coroutines.InteractWith(item))
+                    {
+                        Log.Debug($"[{Name}] Item {item.Name} looted");
+                    }
+
+                    await Wait.SleepSafe(15, 25);
                 };
             }
 
             return true;
         }
 
-        public async Task<LogicResult> Logic(Logic logic)
-        {
-            return LogicResult.Unprovided;
-        }
-
-        public MessageResult Message(Message message)
-        {
-            return MessageResult.Processed;
-        }
-
-        public List<ItemsOnGroundLabelElement> GetNearbyItemsLabels()
+        public List<WorldItem> GetNearbyItems()
         {
             //var metadataObjects = LokiPoe.ObjectManager.GetObjectsByMetadata("123");
-            var labels = GameController.Instance.Game.IngameState.IngameUi.ItemsOnGroundLabels.ToList();
-            List<ItemsOnGroundLabelElement> resultLabels = new List<ItemsOnGroundLabelElement>();
+            var worldItems = LokiPoe.ObjectManager.Objects.OfType<WorldItem>();
+            List<WorldItem> resultWorldItems = new List<WorldItem>();
 
-            foreach (var label in labels)
+            foreach (var wi in worldItems)
             {
-                if (label == null
-                    || !label.IsVisible)
+                if (wi == null
+                    || !wi.IsValid
+                    || trashItems.Contains(wi.Id))
                 {
-
-                    //Log.Debug($"Skipping label {label.ItemOnGround.Name} IsVisible {label.IsVisible} CanPickup {label.CanPickUp}");
                     continue;
                 }
 
-                resultLabels.Add(label);
-            }
-
-            return resultLabels;
-        }
-
-        public List<WorldItem> BuildLootTable(List<ItemsOnGroundLabelElement> labels)
-        {
-            var result = new List<WorldItem>();
-            if (labels.Count == 0)
-            {
-                Log.Warn($"labels.Count {labels.Count}");
-                return result;
-            }
-                
-
-            foreach (var label in labels)
-            {
-                var res = IsLabelToLoot(label);
-                //Log.Debug($"[BuildLootTable] Checking if we need to loot label {label.Label.Text}. Result: {res}");
-                if (res)
+                if (!wi.HasVisibleHighlightLabel
+                    || wi.IsAllocatedToOther
+                    || !IsItemToLoot(wi))
                 {
-                    NetworkObject no = LokiPoe.ObjectManager.GetObjectById(label.ItemOnGround.Id);
-                    WorldItem wi = CastNetworkToWorld(no);
-                    result.Add(wi);
+                    trashItems.Add(wi.Id);
+                    continue;
                 }
+
+                if (wi.Position.Distance(leader.Position) > cFollowerSettings.Instance.RadiusLeaderLoot || wi.Distance > cFollowerSettings.Instance.RadiusPlayerLoot)
+                {
+                    //Log.Debug($"[GetNearbyItems] {wi.Position.Distance(leader.Position)} {wi.Distance}");
+                    continue;
+                }
+
+
+
+                resultWorldItems.Add(wi);
             }
 
-            return result;
+            return resultWorldItems;
         }
 
-        public bool IsLabelToLoot(ItemsOnGroundLabelElement label)
+        public bool IsItemToLoot(WorldItem wi)
         {
-            NetworkObject no = LokiPoe.ObjectManager.GetObjectById(label.ItemOnGround.Id);
-            WorldItem wi = CastNetworkToWorld(no);
-            
             if (wi == null)
             {
-                //Log.Warn($"[IsLabelToLoot] WorldItem is null for {label.Label.Text}");
                 return false;
             }
 
-            string resourcePath = wi.Item.Components.RenderItemComponent.ResourcePath;
-
-            if (!(wi.Position.Distance(leader.Position) < cFollowerSettings.Instance.DistanceToLootLeader || wi.Position.Distance(LokiPoe.Me.Position) < cFollowerSettings.Instance.DistanceToLootPlayer))
+            if (wi.Item.Rarity != DreamPoeBot.Loki.Game.GameData.Rarity.Unique)
             {
-                Log.Warn($"{wi.Position.Distance(leader.Position)} < {cFollowerSettings.Instance.DistanceToLootLeader} || {wi.Position.Distance(LokiPoe.Me.Position)} < {cFollowerSettings.Instance.DistanceToLootPlayer}");
-                return false;
+                return true;
             }
 
-            foreach (var x in cFollowerSettings.Instance.ItemFilterList)
-            {
-                Log.Debug($"[IsLabelToLoot] Enabled {x.Enabled} Name {x.Name} Icon {x.RenderItem}");
-            }
+            string renderArt = wi.Item.RenderArt;
 
-            //Log.Debug($"[IsLabelToLoot] {cFollowerSettings.Instance.ItemFilterList.Any(x => x.RenderItem + "dds" == resourcePath)} {resourcePath}");
-
-            return cFollowerSettings.Instance.ItemFilterList.Any(x => resourcePath.ToLower().Contains(x.RenderItem.ToLower()));
+            return cFollowerSettings.Instance.ItemFilterList.Any(x => renderArt.ToLower().Contains(x.RenderItem.ToLower()));
         }
 
-        public WorldItem CastNetworkToWorld(NetworkObject no)
-        {
-            Log.Debug($"[CastNetworkToWorld] {no.Type}");
+        #region skip
 
-            if (no.Type.Contains("WorldItem"))
-            {
-                return (WorldItem)no;
-            }
-
-            return null;
-        }
         private static readonly ILog Log = Logger.GetLoggerInstanceForType();
         public string Name => "Loot task";
         public string Description => "Task to handle looting";
@@ -181,5 +158,17 @@ namespace cFollower
         public void Tick()
         {
         }
+
+        public async Task<LogicResult> Logic(Logic logic)
+        {
+            return await Task.FromResult(LogicResult.Unprovided);
+        }
+
+        public MessageResult Message(Message message)
+        {
+            return MessageResult.Processed;
+        }
+
+        #endregion
     }
 }

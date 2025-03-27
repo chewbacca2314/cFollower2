@@ -14,6 +14,7 @@ using DreamPoeBot.Loki.Bot.Pathfinding;
 using Message = DreamPoeBot.Loki.Bot.Message;
 using DreamPoeBot.Loki.FilesInMemory;
 using DreamPoeBot.Common;
+using DreamPoeBot.Loki.Game.GameData;
 
 namespace cFollower
 {
@@ -29,30 +30,54 @@ namespace cFollower
                 return false;
             }
 
-            Player leader = Utility.GetLeaderPlayer();
+            Player leader = cFollower.Leader.LeaderPlayer;
             if (leader == null)
             {
                 Log.Debug($"[{Name}] Leader not found. Do nothing");
                 return false;
             }
 
-            if (!ZoneHelper.IsInSameZoneWithLeader())
-            {
-                return false;
-            }
-
             float distanceToLeader = leader.Distance;
 
-            if (!(distanceToLeader > cFollowerSettings.Instance.MinDistanceToFollow || leader.IsMoving || leader?.CurrentAction?.Skill?.InternalName == "TempestFlurry"))
+            if (distanceToLeader < cFollowerSettings.Instance.FollowDistance && !leader.IsMoving && leader?.CurrentAction?.Skill?.InternalName != "TempestFlurry")
             {
                 LokiPoe.ProcessHookManager.ClearAllKeyStates();
                 Log.Debug($"[{Name}] Standing. Distance to leader: {(distanceToLeader)}");
                 return false;
             }
 
+            // Join arena if map has boss
+            if (LokiPoe.LocalData.MapMods.ContainsKey(StatTypeGGG.MapContainsMapBoss) && LokiPoe.LocalData.MapMods[StatTypeGGG.MapContainsMapBoss] == 1)
+            {
+                if (LokiPoe.ObjectManager.GetObjectsByType<AreaTransition>().Any(x => x.IsTargetable))
+                {
+                    await ZoneHelper.InteractWithNearestTransition();
+                }
+            }
+
             var leaderPosition = leader.Position;
             Vector2i fastWalkable = ExilePather.FastWalkablePositionFor(leaderPosition);
+            Vector2i lastSeenLeaderPos = Vector2i.Zero;
             var myPos = LokiPoe.Me.Position;
+
+            // If path exists -> move, else find transition
+            if (ExilePather.PathExistsBetween(myPos, fastWalkable))
+                lastSeenLeaderPos = fastWalkable;
+            else
+            {
+                if (lastSeenLeaderPos != Vector2i.Zero)
+                {
+                    while (lastSeenLeaderPos.Distance(LokiPoe.Me.Position) > 60)
+                    {
+                        Log.Debug($"[{Name}] No path to leader. Moving to last seen pos at {lastSeenLeaderPos}.");
+                        PlayerMoverManager.Current.MoveTowards(lastSeenLeaderPos);
+                        await Wait.SleepSafe(50, 70);
+                    }
+
+                    await ZoneHelper.InteractWithNearestTransition();
+                    await Wait.SleepSafe(100, 200);
+                }
+            }
 
             if (cFollowerSettings.Instance.FollowType == MoverHelper.MoveType.ToCursor)
             {
@@ -68,7 +93,6 @@ namespace cFollower
                     leaderDest = leader.CurrentAction.Destination;
                 }
 
-                
                 if (leaderDest != Vector2i.Zero)
                 {
                     var _fastWalkable = ExilePather.FastWalkablePositionFor(leaderDest);
@@ -79,7 +103,7 @@ namespace cFollower
             
             PlayerMoverManager.Current.MoveTowards(fastWalkable);
 
-            await Wait.SleepSafe(50, 150);
+            await Wait.SleepSafe(20, 40);
             return true;
         }
 
@@ -87,7 +111,7 @@ namespace cFollower
 
         public async Task<LogicResult> Logic(Logic logic)
         {
-            return LogicResult.Unprovided;
+            return await Task.FromResult(LogicResult.Unprovided);
         }
 
         public MessageResult Message(Message message)

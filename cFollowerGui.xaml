@@ -1,19 +1,19 @@
 ﻿<UserControl x:Class="cFollower.cFollowerGUI"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:cFollower"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid DataContext="{x:Static local:cFollowerSettings.Instance}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <!--Please Note!-->
         <!--A bug in Visual Studio, sometime, bug out the design vies that show `Invalid Markup` after you set the Datacontext like done in next line.-->
@@ -22,8 +22,8 @@
             <TabItem Header="General" HorizontalAlignment="Left" VerticalAlignment="Top">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -31,58 +31,56 @@
                     </Grid.RowDefinitions>
                     <GroupBox Header="Options" Grid.Row="0" Grid.Column="0">
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <Label Content="Leader name"/>
-                            <TextBox Text="{Binding Path=LeaderName, Mode=TwoWay}" ToolTip="Leader name"/>
-                            <Label Content="Follow distance"/>
-                            <TextBox Text="{Binding Path=MinDistanceToFollow, Mode=TwoWay}" ToolTip="Minimum distance to start following leader"/>
-                            <Label Content="Transition check distance"/>
-                            <TextBox Text="{Binding Path=DistanceToCheckTransition, Mode=TwoWay}" ToolTip="Distance of leader coords changed to start checking for transition nearby"/>
-                            <Label Content="Obstacle size multiplier (blocking arenas)"/>
-                            <TextBox Text="{Binding Path=ObstacleSizeMultiplier, Mode=TwoWay}" ToolTip="Obstacle size multiplier to block close arena transitions"/>
-                            <Label Content="Move type of follower"/>
+                            <Label Content="Leader name" />
+                            <TextBox Text="{Binding Path=LeaderName, Mode=TwoWay}" ToolTip="Leader name" />
+                            <Label Content="Follow distance" />
+                            <TextBox Text="{Binding Path=FollowDistance, Mode=TwoWay}" ToolTip="Minimum distance to start following leader" />
+                            <Label Content="Move type of follower" />
                             <ComboBox Name="MoveTypeComboBox" ItemsSource="{x:Static local:cFollowerSettings.MoveTypeOptions}" SelectedValue="{Binding Path=FollowType}" SelectedIndex="0" />
                         </StackPanel>
                     </GroupBox>
-                    <GroupBox Header="Deposit" Grid.Row="1" Grid.Column="0">
-                        <StackPanel>
-                            <CheckBox Content="Deposit toggle" IsChecked="{Binding Path=DepositEnabled, Mode=TwoWay}"/>
-                            <CheckBox Content="Trade toggle" IsChecked="{Binding Path=TradeEnabled, Mode=TwoWay}"/>
-                            <Label Content="Tab names (tab1,tab2,tab3)"/>
-                            <TextBox Text="{Binding Path=DepositTabNames, Mode=TwoWay}" ToolTip="Distance of leader coords changed to start checking for transition nearby"/>
-                            <Label Content="Trade deposit delay"/>
-                            <TextBox Text="{Binding Path=TradeDepositDelay, Mode=TwoWay}" ToolTip="Distance of leader coords changed to start checking for transition nearby"/>
-                            <Label Content="Stash deposit delay"/>
-                            <TextBox Text="{Binding Path=GuildStashDepositDelay, Mode=TwoWay}" ToolTip="Distance of leader coords changed to start checking for transition nearby"/>
-                            <Label Content="Guild stash deposit delay"/>
-                            <TextBox Text="{Binding Path=StashDepositDelay, Mode=TwoWay}" ToolTip="Distance of leader coords changed to start checking for transition nearby"/>
-                        </StackPanel>
-
-                    </GroupBox>
                 </Grid>
-
+            </TabItem>
+            <TabItem Header="Deposit / Trade">
+                <GroupBox Header="ЗАГОЛОВОК.RUS" Grid.Row="1" Grid.Column="0">
+                    <StackPanel>
+                        <CheckBox Content="Deposit toggle" IsChecked="{Binding Path=DepositEnabled, Mode=TwoWay}" />
+                        <CheckBox Content="Trade toggle" IsChecked="{Binding Path=TradeEnabled, Mode=TwoWay}" />
+                        <Label Content="Tab names (tab1,tab2,tab3)" />
+                        <TextBox Text="{Binding Path=DepositTabNames, Mode=TwoWay}" ToolTip="Guild tabs deposit to" />
+                        <Label Content="Trade deposit delay" />
+                        <TextBox Text="{Binding Path=TradeDepositDelay, Mode=TwoWay}" ToolTip="Delay between clicks while in trade" />
+                        <Label Content="Stash deposit delay" />
+                        <TextBox Text="{Binding Path=GuildStashDepositDelay, Mode=TwoWay}" ToolTip="Delay between clicks while depositing to GS" />
+                        <Label Content="Guild stash deposit delay" />
+                        <TextBox Text="{Binding Path=StashDepositDelay, Mode=TwoWay}" ToolTip="Delay between clicks while depositing to stash" />
+                    </StackPanel>
+                </GroupBox>
             </TabItem>
             <TabItem Header="Loot" HorizontalAlignment="Left" VerticalAlignment="Top">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <GroupBox Header="Settings" Grid.Row="0" Grid.Column="0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <GroupBox Header="Settings" Grid.Row="0" Grid.Column="0">
                             <StackPanel>
-                                <CheckBox Content="Loot toggle" IsChecked="{Binding Path=LootEnabled, Mode=TwoWay}"/>
-                                <Label Content="Distance to leader for start looting"/>
-                                <TextBox Text="{Binding Path=DistanceToLeaderLoot, Mode=TwoWay}" ToolTip="Distance to leader where to start loot items"/>
-                                <Label Content="Range to loot : leader"/>
-                                <TextBox Text="{Binding Path=DistanceToLootLeader, Mode=TwoWay}" ToolTip="Range around the leader where bot loot items"/>
-                                <Label Content="Range to loot : player"/>
-                                <TextBox Text="{Binding Path=DistanceToLootPlayer, Mode=TwoWay}" ToolTip="Range around the player where bot loot items"/>
+                                <CheckBox Content="Loot toggle" IsChecked="{Binding Path=LootEnabled, Mode=TwoWay}" />
+                                <Label Content="Ground items refresh rate" />
+                                <TextBox Text="{Binding Path=GroundItemsRefreshRate, Mode=TwoWay}" ToolTip="Refresh rate (ms) of scanning items on ground. Default 80" />
+                                <Label Content="Distance to leader for start looting" />
+                                <TextBox Text="{Binding Path=DistanceToLeaderLoot, Mode=TwoWay}" ToolTip="Distance to leader where to start loot items. Default 55" />
+                                <Label Content="Radius of looting around leader" />
+                                <TextBox Text="{Binding Path=RadiusLeaderLoot, Mode=TwoWay}" ToolTip="Radis around leader to check for items to loot. Default 40" />
+                                <Label Content="Radius of looting around player" />
+                                <TextBox Text="{Binding Path=RadiusPlayerLoot, Mode=TwoWay}" ToolTip="Radis around player to check for items to loot. Default 40" />
                             </StackPanel>
-                    </GroupBox>
+                        </GroupBox>
                         <GroupBox Header="Filter" Grid.Row="1" Grid.Column="0">
                             <DataGrid CanUserSortColumns="False" ItemsSource="{Binding Path=ItemFilterList}" AutoGenerateColumns="False" AllowDrop="False" VerticalAlignment="Top">
                                 <DataGrid.Columns>
@@ -93,10 +91,8 @@
                             </DataGrid>
                         </GroupBox>
                     </Grid>
-                    </ScrollViewer>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
     </Grid>
-    
-    
 </UserControl>
