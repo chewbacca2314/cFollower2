@@ -25,7 +25,6 @@ namespace cFollower
         private string _leaderName;
         private MoverHelper.MoveType _moveType;
         private int _followDistance;
-        private int _transitionCheckDistance;
         private bool _lootEnabled;
         private bool _depositEnabled;
         private bool _tradeEnabled;

@@ -14,6 +14,7 @@ using DreamPoeBot.Loki.Common;
 using DreamPoeBot.Loki.Game;
 using DreamPoeBot.Loki.RemoteMemoryObjects;
 using log4net;
+using MahApps.Metro.Controls;
 using Message = DreamPoeBot.Loki.Bot.Message;
 using UserControl = System.Windows.Controls.UserControl;
 
@@ -89,40 +90,34 @@ namespace cFollower.cMover
                 _cmd.Path[0] = ExilePather.FastWalkablePositionFor(point);
             }
 
+            if (cMoverSettings.Instance.BlinkToggle)
+            {
+                var blinkSkill = LokiPoe.Me.GetSkillByName("blink");
+
+                if (blinkSkill == null)
+                {
+                    Log.ErrorFormat("[cMover.BasicMove] Blink is null. Enable blink or toggle it off in settings");
+
+                    BotManager.Stop();
+
+                    return false;
+                }
+
+                Vector2i raycastHit = Vector2i.Zero;
+                if (!blinkSkill.IsOnCooldown && myPosition.Distance(position) > cMoverSettings.Instance.BlinkDistance && !ExilePather.Raycast(myPosition, position, out raycastHit))
+                {
+                    Log.Debug($"[cMover.BasicMove] Using blink at {position}.");
+                    MouseManager.SetMousePos("cMover.BasicMove.Blink", point);
+                    LokiPoe.Input.SimulateKeyEvent(Keys.Space);
+
+                    return true;
+                }
+            }
+
             return BasicMove(myPosition, point);
         }
 
         public override string ToString() => $"{Name}: {Description}";
-
-        //public void UseMove(Vector2i point)
-        //{
-        //    if (moveSkillOnPanel == null || moveSkillOnPanelKey == System.Windows.Forms.Keys.None)
-        //    {
-        //        Log.Debug($"[{Name}] Move skill on panel is NULL. Clearing slot 4");
-        //        LokiPoe.InGameState.SkillBarHud.ClearSlot(4);
-        //        var moveSkill = LokiPoe.InGameState.SkillBarHud.Skills.FirstOrDefault(x => x.InternalName == "Move");
-        //        Log.Debug($"[{Name}] Move skill on panel is NULL. Setting move to slot 4");
-        //        LokiPoe.InGameState.SkillBarHud.SetSlot(4, moveSkill);
-        //        Wait.LatencySleep();
-        //        moveSkillOnPanel = LokiPoe.InGameState.SkillBarHud.LastBoundMoveSkill;
-        //        Wait.LatencySleep();
-        //        moveSkillOnPanelKey = moveSkillOnPanel.BoundKey;
-        //        moveSkillOnPanelSlot = moveSkillOnPanel.Slot;
-        //        Log.Debug($"[{Name}] Move skill key is now {moveSkillOnPanelKey}");
-        //    }
-        //    else
-        //    {
-        //        if (!LokiPoe.ProcessHookManager.IsKeyDown(moveSkillOnPanelKey))
-        //        {
-        //            LokiPoe.ProcessHookManager.ClearAllKeyStates();
-        //            LokiPoe.InGameState.SkillBarHud.BeginUseAt(moveSkillOnPanelSlot, false, point);
-        //        }
-        //        else
-        //        {
-        //            MouseManager.SetMousePos("cMover.UseMove", point, false);
-        //        }
-        //    }
-        //}
 
         private static bool BasicMove(Vector2i myPosition, Vector2i point)
         {
@@ -132,12 +127,14 @@ namespace cFollower.cMover
             var move = LokiPoe.InGameState.SkillBarHud.LastBoundMoveSkill;
             if (move == null)
             {
-                Log.ErrorFormat("[Alcor75PlayerMover.MoveTowards] Please assign the \"Move\" skill to your skillbar, do not use mouse button, use q,w,e,r,t!");
+                Log.ErrorFormat("[cMover.BasicMove] Please assign the \"Move\" skill to your skillbar, do not use mouse button, use q,w,e,r,t!");
 
                 BotManager.Stop();
 
                 return false;
             }
+
+            var pointDist = myPosition.Distance(point);
 
             // In this example we check the current state of the key assigned to the move skill.
             if ((LokiPoe.ProcessHookManager.GetKeyState(move.BoundKeys.Last()) & 0x8000) != 0 &&
@@ -173,6 +170,7 @@ namespace cFollower.cMover
                     Log.WarnFormat("[BeginUseAt] {0}", point);
                 }
             }
+
             return true;
         }
 

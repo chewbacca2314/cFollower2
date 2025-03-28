@@ -23,6 +23,8 @@ namespace cFollower.cMover
         private bool _randomizeMove;
         private bool _avoidWallHugging;
         private int _singleUseDistance;
+        private bool _blinkToggle;
+        private int _blinkDistance;
 
         [DefaultValue(true)]
         public bool RandomizeMove
@@ -81,6 +83,28 @@ namespace cFollower.cMover
                 if (value == _singleUseDistance) return;
                 _singleUseDistance = value;
                 NotifyPropertyChanged(() => SingleUseDistance);
+            }
+        }
+        [DefaultValue(true)]
+        public bool BlinkToggle
+        {
+            get { return _blinkToggle; }
+            set
+            {
+                if (value == _blinkToggle) return;
+                _blinkToggle = value;
+                NotifyPropertyChanged(() => BlinkToggle);
+            }
+        }
+        [DefaultValue(100)]
+        public int BlinkDistance
+        {
+            get { return _blinkDistance; }
+            set
+            {
+                if (value == _blinkDistance) return;
+                _blinkDistance = value;
+                NotifyPropertyChanged(() => BlinkDistance);
             }
         }
     }

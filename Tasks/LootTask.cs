@@ -30,7 +30,7 @@ namespace cFollower
         private Player leader;
         private Stopwatch lootSw = Stopwatch.StartNew();
         private HashSet<int> trashItems = new HashSet<int>();
-        private List<WorldItem> lootTable = new List<WorldItem>();
+        private HashSet<WorldItem> lootTable = new HashSet<WorldItem>();
 
         public async Task<bool> Run()
         {
@@ -51,7 +51,7 @@ namespace cFollower
             //}
             if (lootSw.IsRunning && lootSw.ElapsedMilliseconds > cFollowerSettings.Instance.GroundItemsRefreshRate)
             {
-                lootTable = GetNearbyItems().OrderBy(x => x.Distance).ToList();
+                lootTable = GetNearbyItems();
                 lootSw.Restart();
             }
 
@@ -70,50 +70,60 @@ namespace cFollower
                     return false;
                 }
 
+                var itemPos = item.Position;
+                if (LokiPoe.MyPosition.Distance(itemPos) > cFollowerSettings.Instance.RadiusPlayerLoot
+                    || leader.Position.Distance(itemPos) > cFollowerSettings.Instance.RadiusLeaderLoot)
+                {
+                    continue;
+                }
+
+                if (!item.HasVisibleHighlightLabel)
+                {
+                    continue;
+                }
+
                 if (invControl.Inventory.CanFitItem(item.Item))
                 {
                     if (item.IsHighlightable && await Coroutines.InteractWith(item))
                     {
                         Log.Debug($"[{Name}] Item {item.Name} looted");
                     }
-
-                    await Wait.SleepSafe(15, 25);
                 };
             }
 
-            return true;
+            return false;
         }
 
-        public List<WorldItem> GetNearbyItems()
+        public HashSet<WorldItem> GetNearbyItems()
         {
             //var metadataObjects = LokiPoe.ObjectManager.GetObjectsByMetadata("123");
             var worldItems = LokiPoe.ObjectManager.Objects.OfType<WorldItem>();
-            List<WorldItem> resultWorldItems = new List<WorldItem>();
+            HashSet<WorldItem> resultWorldItems = new HashSet<WorldItem>();
 
             foreach (var wi in worldItems)
             {
                 if (wi == null
                     || !wi.IsValid
-                    || trashItems.Contains(wi.Id))
+                    || trashItems.Contains(wi.Id)
+                    || !wi.HasVisibleHighlightLabel)
                 {
                     continue;
                 }
 
-                if (!wi.HasVisibleHighlightLabel
-                    || wi.IsAllocatedToOther
+                if (wi.IsAllocatedToOther
                     || !IsItemToLoot(wi))
                 {
                     trashItems.Add(wi.Id);
                     continue;
                 }
 
-                if (wi.Position.Distance(leader.Position) > cFollowerSettings.Instance.RadiusLeaderLoot || wi.Distance > cFollowerSettings.Instance.RadiusPlayerLoot)
+                var wiPos = wi.Position;
+
+                if (LokiPoe.MyPosition.Distance(wiPos) > cFollowerSettings.Instance.RadiusPlayerLoot
+                    || leader.Position.Distance(wiPos) > cFollowerSettings.Instance.RadiusLeaderLoot)
                 {
-                    //Log.Debug($"[GetNearbyItems] {wi.Position.Distance(leader.Position)} {wi.Distance}");
                     continue;
                 }
-
-
 
                 resultWorldItems.Add(wi);
             }

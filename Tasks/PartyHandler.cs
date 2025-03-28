@@ -36,11 +36,6 @@ namespace cFollower
                 return false;
             }
 
-            if (partyStatus == PartyStatus.None)
-            {
-                return true;
-            }
-
             if (partyStatus == PartyStatus.PartyLeader) // set actual party leader if we're in party
             {
                 var leader = cFollower.Leader.LeaderParty;
